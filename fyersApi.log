@@ -1,0 +1,9 @@
+{"level":"ERROR","location":"[get_call:146] fyersModel","message":{"API":"/quotes","Error":{"message":"Please provide valid token","code":-15,"s":"error"}},"timestamp":"2025-05-16 06:19:57,864+0530","service":"FyersAPI"}
+{"level":"ERROR","location":"[get_call:146] fyersModel","message":{"API":"/history","Error":{"code":-300,"message":"Invalid symbol provided","s":"error"}},"timestamp":"2025-05-16 13:06:27,615+0530","service":"FyersAPI"}
+{"level":"ERROR","location":"[get_call:146] fyersModel","message":{"API":"/history","Error":{"code":-300,"message":"Invalid symbol provided","s":"error"}},"timestamp":"2025-05-16 13:07:11,190+0530","service":"FyersAPI"}
+{"level":"ERROR","location":"[get_call:146] fyersModel","message":{"API":"/history","Error":{"code":-300,"message":"Invalid symbol provided","s":"error"}},"timestamp":"2025-05-16 13:07:34,013+0530","service":"FyersAPI"}
+{"level":"ERROR","location":"[get_call:146] fyersModel","message":{"API":"/history","Error":{"code":-300,"message":"Invalid symbol provided","s":"error"}},"timestamp":"2025-05-16 13:07:58,618+0530","service":"FyersAPI"}
+{"level":"ERROR","location":"[get_call:146] fyersModel","message":{"API":"/history","Error":{"code":-300,"message":"Invalid symbol provided","s":"error"}},"timestamp":"2025-05-16 13:08:08,376+0530","service":"FyersAPI"}
+{"level":"ERROR","location":"[get_call:146] fyersModel","message":{"API":"/history","Error":{"code":-300,"message":"Invalid symbol provided","s":"error"}},"timestamp":"2025-05-16 13:13:29,032+0530","service":"FyersAPI"}
+{"level":"ERROR","location":"[get_call:146] fyersModel","message":{"API":"/history","Error":{"code":-300,"message":"Invalid symbol provided","s":"error"}},"timestamp":"2025-05-16 13:13:29,824+0530","service":"FyersAPI"}
+{"level":"ERROR","location":"[get_call:155] fyersModel","message":{"API":"/quotes","error":"not a valid non-string sequence or mapping object"},"timestamp":"2025-05-16 13:21:22,420+0530","service":"FyersAPI"}

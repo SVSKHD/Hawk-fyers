@@ -2,16 +2,10 @@ import os
 import webbrowser
 from dotenv import load_dotenv
 from fyers_apiv3 import fyersModel
+from config import client_id, secret_id, redirect_url, response_type, grant_type, state
 
 # Load .env variables
 load_dotenv()
-
-client_id = os.getenv("client_id")
-secret_id = os.getenv("secret_id")
-redirect_url = os.getenv("redirect_url")
-response_type = "code"
-grant_type = "authorization_code"
-state = "sample_state"
 
 session = fyersModel.SessionModel(
     client_id=client_id,
