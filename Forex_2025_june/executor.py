@@ -2,9 +2,9 @@
 import time
 import os
 from datetime import datetime
-from mt5_ops import MT5Ops
+from mt5_ops_price import MT5Ops
 from hybrid_strategy import HybridStrategy
-from strategy_config import strategy_config
+from config import strategy_config
 
 
 class Executor:
