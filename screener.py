@@ -1,15 +1,12 @@
-from fyers_ops import get_market_start_price, start_fyers_socket, live_prices
+from fyers_ops import get_market_start_price, live_prices
+from config import symbols
 import time
 
-symbols_to_check = [
-    "NSE:SBIN-EQ", "NSE:IDEA-EQ", "NSE:RELIANCE-EQ",
-    "NSE:INFY-EQ", "NSE:ICICIBANK-EQ", "NSE:HDFCBANK-EQ", "NSE:AXISBANK-EQ"
-]
+
 
 THRESHOLD_PERCENT = 0.25  # Entry signal trigger
 
-# Start the WebSocket
-start_fyers_socket()  # ✅ Now takes no arguments, symbols are hardcoded in `fyers_ops.py`
+
 
 # Allow some time for WebSocket to connect and receive first updates
 print("[INFO] Waiting for live prices...")
@@ -17,7 +14,7 @@ time.sleep(10)
 
 # Fetch start prices at market open
 start_prices = {}
-for symbol in symbols_to_check:
+for symbol in symbols:
     sp = get_market_start_price(symbol)
     if sp:
         start_prices[symbol] = sp
@@ -32,7 +29,7 @@ print("\n--- Screener Running (Press Ctrl+C to stop) ---\n")
 
 try:
     while True:
-        for symbol in symbols_to_check:
+        for symbol in symbols:
             current = live_prices.get(symbol)
             start = start_prices.get(symbol)
             if current is not None and start is not None:

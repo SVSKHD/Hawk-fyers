@@ -1,23 +1,19 @@
 import datetime
-import time
 from fyers_apiv3 import fyersModel
 from fyers_apiv3.FyersWebsocket import data_ws
-from config import client_id, access_token
+from config import client_id, access_token, symbols
 
-# Initialize Fyers REST client
+# REST client (for historical data)
 fyers = fyersModel.FyersModel(
     client_id=client_id,
     token=access_token,
     log_path=""
 )
 
-# Global store for live prices
+# Global live price storage
 live_prices = {}
 
 def get_market_start_price(fyers_symbol):
-    """
-    Fetch the market open price for the day from historical candles.
-    """
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     payload = {
         "symbol": fyers_symbol,
@@ -27,57 +23,51 @@ def get_market_start_price(fyers_symbol):
         "range_to": today,
         "cont_flag": "1"
     }
-
     try:
         response = fyers.history(payload)
         if response.get('code') == 200 and 'candles' in response and len(response['candles']) > 0:
-            return response['candles'][0][1]  # open price
+            return response['candles'][0][1]  # Open price
         else:
-            print(f"Could not fetch market start price for {fyers_symbol}. Response: {response}")
+            print(f"[ERROR] Could not fetch open price for {fyers_symbol}. Response: {response}")
             return None
     except Exception as e:
-        print(f"An error occurred while fetching market start price for {fyers_symbol}: {e}")
+        print(f"[EXCEPTION] {e}")
         return None
 
-# WebSocket Event Handlers
-def on_message(message):
+def on_message(msg):
+    print("Response:", msg)
     try:
-        symbol = message.get("symbol")
-        price = message.get("ltp")
-        if symbol and price:
-            live_prices[symbol] = price
-            print(f"[UPDATE] {symbol} = {price}")
+        if msg.get("type") == "symbolUpdate":
+            symbol = msg["symbol"]
+            ltp = msg["ltp"]
+            live_prices[symbol] = ltp
+            print(f"[LIVE] {symbol} = {ltp}")
     except Exception as e:
-        print(f"[ERROR] WebSocket on_message: {e}")
+        print("[PARSE ERROR]", e)
 
 def on_error(msg):
-    print("Socket Error:", msg)
+    print("[ERROR]", msg)
 
 def on_close(msg):
-    print("Socket Closed:", msg)
+    print("[CLOSE]", msg)
 
-def on_connect():
-    # List of symbols to subscribe
-    symbols = ['NSE:SBIN-EQ', 'NSE:IDEA-EQ', 'NSE:RELIANCE-EQ',
-               'NSE:INFY-EQ', 'NSE:ICICIBANK-EQ', 'NSE:HDFCBANK-EQ', 'NSE:AXISBANK-EQ']
-    fyers_socket.subscribe(symbols=symbols, data_type="LTP")
-    print(f"[SUBSCRIBED] Subscribed to: {symbols}")
+def on_open(ws):
+    print("[CONNECTED] Subscribing to symbols...")
+    symbols = ['NSE:SBIN-EQ', 'NSE:ADANIENT-EQ']
+    ws.subscribe(symbols=symbols, data_type="SymbolUpdate")
 
-# Global socket object
-fyers_socket = data_ws.FyersDataSocket(
+# Create and connect the FyersDataSocket
+fyers_live = data_ws.FyersDataSocket(
     access_token=access_token,
     log_path="",
+    litemode=False,
     write_to_file=False,
     reconnect=True,
-    on_connect=on_connect,
+    on_connect=on_open,
     on_close=on_close,
     on_error=on_error,
     on_message=on_message
 )
 
-def start_fyers_socket():
-    """
-    Start WebSocket connection and subscribe to LTP updates.
-    """
-    fyers_socket.connect()
-    print("[INFO] Fyers WebSocket started...")
+# Connect to the socket (this must be last)
+fyers_live.connect()

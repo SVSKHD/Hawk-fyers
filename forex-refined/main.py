@@ -1,4 +1,4 @@
-# main.py
+# auth.py
 import time
 from datetime import datetime
 from mt5_ops import MT5Ops

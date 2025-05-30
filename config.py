@@ -10,3 +10,7 @@ redirect_url = os.getenv("redirect_url")
 response_type = "code"
 grant_type = "authorization_code"
 state = "sample_state"
+symbols =[
+    "NSE:SBIN-EQ", "NSE:IDEA-EQ", "NSE:RELIANCE-EQ",
+    "NSE:INFY-EQ", "NSE:ICICIBANK-EQ", "NSE:HDFCBANK-EQ", "NSE:AXISBANK-EQ"
+]
