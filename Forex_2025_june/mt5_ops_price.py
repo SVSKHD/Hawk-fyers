@@ -1,5 +1,4 @@
 import MetaTrader5 as mt5
-import pytz
 from datetime import datetime, timedelta
 
 class MT5Ops:
@@ -7,16 +6,16 @@ class MT5Ops:
         if not mt5.initialize():
             raise RuntimeError(f"MT5 Initialization failed: {mt5.last_error()}")
 
-    def get_start_price(symbol):
-        now = datetime.datetime.utcnow() + datetime.timedelta(hours=3)  # UTC+3
-        if now.weekday() == 0:  # Monday
-            last_trading_day = now - datetime.timedelta(days=3)  # Friday
-        else:
-            last_trading_day = now
+    def get_start_price(self, symbol):
+        now = datetime.utcnow() + timedelta(hours=3)  # UTC+3
 
-        # Fetch last known candle for that day (e.g. last 5-min candle)
-        from_time = last_trading_day.replace(hour=0, minute=0, second=0)
-        to_time = last_trading_day.replace(hour=23, minute=58, second=0)
+        if now.weekday() == 0:  # Monday
+            last_trading_day = now - timedelta(days=3)  # Use Friday
+        else:
+            last_trading_day = now - timedelta(days=1)  # Use previous day
+
+        from_time = datetime(last_trading_day.year, last_trading_day.month, last_trading_day.day, 0, 0)
+        to_time = from_time + timedelta(hours=23, minutes=59)
 
         rates = mt5.copy_rates_range(symbol, mt5.TIMEFRAME_M5, from_time, to_time)
         if rates is not None and len(rates) > 0:
@@ -32,8 +31,3 @@ class MT5Ops:
 
     def shutdown(self):
         mt5.shutdown()
-
-# Example usage:
-# mt5ops = MT5Ops()
-# start_price = mt5ops.get_start_price("EURUSD")
-# current_price = mt5ops.get_current_price("EURUSD")
