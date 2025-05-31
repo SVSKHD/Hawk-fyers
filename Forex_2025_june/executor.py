@@ -1,3 +1,4 @@
+
 # executor.py
 import time
 import os
@@ -5,6 +6,9 @@ from datetime import datetime
 from mt5_ops_price import MT5Ops
 from hybrid_strategy import HybridStrategy
 from config import strategy_config
+from inhibitor import should_allow_trade  # ✅ Import inhibitor check
+from trade_ops import TradeExecutor
+
 
 
 class Executor:
@@ -15,6 +19,7 @@ class Executor:
         self.start_prices = {}
         self.active_hedge = {symbol: False for symbol in self.symbols}
         self.initialize_strategies()
+        self.trade_executor = TradeExecutor()
 
     def initialize_strategies(self):
         for symbol in self.symbols:
@@ -27,7 +32,7 @@ class Executor:
         today = datetime.now().strftime("%Y-%m-%d")
         os.makedirs("logs", exist_ok=True)
         with open(f"logs/{today}_trades.txt", "a") as f:
-            f.write(f"{symbol}|{direction}|{ticket}|{entry_price}|{lot}|{datetime.now().strftime('%H:%M:%S')}\n")
+            f.write(f"{symbol}|{direction}|{ticket}|{entry_price}|{lot}|{datetime.now().strftime('%H:%M:%S')}")
 
     def find_trade(self, symbol):
         today = datetime.now().strftime("%Y-%m-%d")
@@ -56,13 +61,19 @@ class Executor:
                     strategy = self.strategies[symbol]
 
                     if not strategy.entry_price:
-                        triggered, direction = strategy.check_entry(price)
-                        if triggered:
-                            print(f"[ENTRY] {symbol} - {direction} @ {price}")
-                            # Placeholder for placing trade
-                            ticket = 100000  # dummy ticket for testing
-                            self.store_trade_log(symbol, direction, ticket, price, 0.5)
-                            self.active_hedge[symbol] = True
+                        if should_allow_trade(symbol):  # ✅ Check inhibitor before placing trade
+                            triggered, direction = strategy.check_entry(price)
+                            if triggered:
+                                print(f"[ENTRY] {symbol} - {direction} @ {price}")
+                                result = self.trade_executor.place_trade(symbol, direction, lot=0.5)
+                                if result.retcode == 10009:  # TRADE_RETCODE_DONE
+                                    ticket = result.order
+                                    self.store_trade_log(symbol, direction, ticket, price, 0.5)
+                                    self.active_hedge[symbol] = True
+                                else:
+                                    print(f"[ERROR] Trade failed for {symbol}: {result.comment}")
+                        else:
+                            print(f"[SKIP] Trade already placed for {symbol} today")
                     else:
                         action = strategy.evaluate_trade(price)
                         if action in ["CLOSE_SECURE", "CLOSE_TRAIL"]:
