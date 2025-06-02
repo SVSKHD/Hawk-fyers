@@ -6,9 +6,8 @@ from datetime import datetime
 from mt5_ops_price import MT5Ops
 from hybrid_strategy import HybridStrategy
 from config import strategy_config
-from inhibitor import should_allow_trade  # ✅ Import inhibitor check
+from inhibitor import should_allow_trade
 from trade_ops import TradeExecutor
-
 
 
 class Executor:
@@ -32,7 +31,7 @@ class Executor:
         today = datetime.now().strftime("%Y-%m-%d")
         os.makedirs("logs", exist_ok=True)
         with open(f"logs/{today}_trades.txt", "a") as f:
-            f.write(f"{symbol}|{direction}|{ticket}|{entry_price}|{lot}|{datetime.now().strftime('%H:%M:%S')}")
+            f.write(f"{symbol}|{direction}|{ticket}|{entry_price}|{lot}|{datetime.now().strftime('%H:%M:%S')}\n")
 
     def find_trade(self, symbol):
         today = datetime.now().strftime("%Y-%m-%d")
@@ -61,12 +60,12 @@ class Executor:
                     strategy = self.strategies[symbol]
 
                     if not strategy.entry_price:
-                        if should_allow_trade(symbol):  # ✅ Check inhibitor before placing trade
+                        if should_allow_trade(symbol):
                             triggered, direction = strategy.check_entry(price)
                             if triggered:
                                 print(f"[ENTRY] {symbol} - {direction} @ {price}")
                                 result = self.trade_executor.place_trade(symbol, direction, lot=0.5)
-                                if result.retcode == 10009:  # TRADE_RETCODE_DONE
+                                if result.retcode == 10009:
                                     ticket = result.order
                                     self.store_trade_log(symbol, direction, ticket, price, 0.5)
                                     self.active_hedge[symbol] = True
@@ -80,6 +79,11 @@ class Executor:
                             trade = self.find_trade(symbol)
                             if trade:
                                 print(f"[EXIT] {symbol} - {action} @ {price}")
+                                result = self.trade_executor.close_trade(symbol, trade["ticket"])  # ✅ Correct
+                                if result.retcode == 10009:
+                                    print(f"[CLOSED] {symbol} ticket {trade['ticket']} successfully.")
+                                else:
+                                    print(f"[ERROR] Failed to close {symbol} ticket {trade['ticket']}: {result.comment}")
                                 self.active_hedge[symbol] = False
                                 strategy.reset()
                         elif action == "HEDGE" and self.active_hedge[symbol]:
