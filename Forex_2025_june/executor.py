@@ -76,7 +76,7 @@ class Executor:
                             trade = self.find_trade(symbol)
                             if trade:
                                 print(f"[EXIT] {symbol} - {action} @ {price}")
-                                result = self.trade_executor.close_trade(trade["ticket"])
+                                result = self.trade_executor.close_trade(trade["ticket"], symbol)
                                 if result.retcode == 10009:
                                     print(f"[CLOSED] {symbol} ticket {trade['ticket']} successfully.")
                                 else:
