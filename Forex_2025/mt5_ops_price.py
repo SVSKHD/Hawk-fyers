@@ -8,9 +8,9 @@ class MT5Ops:
             raise RuntimeError(f"MT5 Initialization failed: {mt5.last_error()}")
 
     def get_start_price(symbol):
-        now = datetime.datetime.utcnow() + datetime.timedelta(hours=3)  # UTC+3
+        now = datetime.utcnow() + timedelta(hours=3)  # UTC+3
         if now.weekday() == 0:  # Monday
-            last_trading_day = now - datetime.timedelta(days=3)  # Friday
+            last_trading_day = now - timedelta(days=3)  # Friday
         else:
             last_trading_day = now
 
